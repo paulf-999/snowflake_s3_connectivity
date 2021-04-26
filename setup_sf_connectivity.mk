@@ -17,7 +17,7 @@ $(eval SNOWFLAKE_ACCOUNT_NAME=$(shell jq '.Parameters.SnowflakeParameters.Snowfl
 $(eval S3_BUCKET=$(shell jq '.Parameters.AdditionalParameters.S3Bucket' ${CONFIG_FILE}))
 $(eval CAPABILITIES=$(shell jq '.Parameters.AdditionalParameters.CloudFormationStackCapabilities' ${CONFIG_FILE}))
 CAPABILITIES=CAPABILITY_IAM CAPABILITY_NAMED_IAM
-S3_BUCKET_LIST='s3://${S3_BUCKET}'#,'s3://${S3_BUCKET_NEXUS}','s3://${S3_BUCKET_GENESYS}'
+S3_BUCKET_LIST='s3://${S3_BUCKET}'#,'s3://${OTHER_S3_BUCKET}','s3://${OTHER_S3_BUCKET}'
 
 deps:
 	$(info [+] Install dependencies (snowsql))
@@ -26,6 +26,7 @@ deps:
 
 get_snowflake_vpcid:
 	$(info [+] Get Snowflake's VPCID)
+	@[ "${SNOWFLAKE_CONN_PROFILE}" ] || ( echo "\nError: SNOWFLAKE_CONN_PROFILE variable is not set\n"; exit 1 )
 	@${SNOWSQL_QUERY_OPTS} -q 'SELECT system$$get_snowflake_platform_info();' -r accountadmin > op/stg/snowflake-query-op/snowflake-vpcid.txt
 
 update_s3_bucket_policies:
@@ -50,6 +51,8 @@ create_tmp_snowflake_iam_role:
 	ParameterKey=TrustedAccountID,ParameterValue=${AWS_ACCOUNT_ID}
 
 create_sf_storage_int_obj:
+	$(info [+] Create the Snowflake storage int object)
+	@[ "${SNOWFLAKE_CONN_PROFILE}" ] || ( echo "\nError: SNOWFLAKE_CONN_PROFILE variable is not set\n"; exit 1 )
 	#1) Create a storage integration object
 	@${SNOWSQL_QUERY_OPTS} -o quiet=true -f sql/dwh/account-objects/storage-integration/v1-create-s3-storage-integration.sql -D PROGRAM=${PROGRAM} -D ENV=${ENV} -D IAMROLENAME=${SNOWFLAKE_IAM_ROLE_NAME} -D AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} -D ALLOWED_S3_LOCATIONS="${BUCKET_LIST}"
 	#2) Grant usage permissions of Storage Integration object to '{PROGRAM}_{ENV}_SI_ADMIN' (storage integration admin)
@@ -59,7 +62,7 @@ create_sf_storage_int_obj:
 	@${SNOWSQL_QUERY_OPTS} -q "desc integration ${PROGRAM}_${ENV}_S3_INT;" -r accountadmin > op/stg/snowflake-query-op/snowflake-iam-user.txt
 
 create_snowflake_iam_role:
-	$(info [+] Create the finalised Snowflake IAM role/policy, used to allow comms between AWS and Snowflake)
+	$(info [+] Create the finalised Snowflake IAM role, used to allow comms between AWS and Snowflake)
 	#1) assign vars to the snowsql query op
 	$(eval SNOWFLAKE_IAM_USER_ARN=$(shell python3 py/parse_snowflake_op.py get_snowflake_iam_user_arn ${SNOWFLAKE_ACCOUNT_NAME}))
 	$(eval SNOWFLAKE_EXT_ID=$(shell python3 py/parse_snowflake_op.py get_ext_id ${SNOWFLAKE_ACCOUNT_NAME}))
