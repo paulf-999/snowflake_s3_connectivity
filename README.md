@@ -1,6 +1,6 @@
 ## Snowflake-S3-Connectivity
 
-Automation script to orchestrate of the steps required establish comms between an S3 bucket and Snowflake, using Snowflake Storage Integration objects.
+Automation script to orchestrate of the steps required establish communication between an S3 bucket and Snowflake, using Snowflake Storage Integration objects. This script looks to automate the steps described here - https://docs.snowflake.com/en/user-guide/data-load-s3-config-storage-integration.html
 
 ### High-level summary
 
@@ -18,3 +18,7 @@ The steps involved in building and executing involve:
 
 1) Updating the input parameters within `env/env.json`
 2) and running `make -f setup_s3_connectivity.mk`!
+
+### To do:
+
+* highlight input args required, e.g. ${AWS_PROFILE}
