@@ -32,6 +32,8 @@ get_snowflake_vpcid:
 update_s3_bucket_policies:
 	$(info [+] Change S3 bucket policies, to allow communication from Snowflake's VPC ID)
 	@$(eval VPCID=$(shell python3 py/parse_snowflake_op.py get_snowflake_vpcid ${SNOWFLAKE_ACCOUNT_NAME}))
+	@[ "${AWS_PROFILE}" ] || ( echo "\nError: AWS_PROFILE variable is not set\n"; exit 1 )
+	@[ "${SNOWFLAKE_VPCID}" ] || ( echo "\nError: SNOWFLAKE_VPCID variable is not set\n"; exit 1 )
 	@aws cloudformation create-stack \
 	--profile ${AWS_PROFILE} \
 	--stack-name ${PROGRAM}-s3-bucket-policy-update-for-snowflake \
@@ -41,6 +43,7 @@ update_s3_bucket_policies:
 
 create_tmp_snowflake_iam_role:
 	$(info [+] Create a tmp Snowflake IAM role, to allow a SF storage int object to be initially created)
+	@[ "${AWS_PROFILE}" ] || ( echo "\nError: AWS_PROFILE variable is not set\n"; exit 1 )
 	#1) Create a temporary Snowflake IAM role
 	@aws cloudformation create-stack \
 	--profile ${AWS_PROFILE} \
@@ -63,6 +66,7 @@ create_sf_storage_int_obj:
 
 create_snowflake_iam_role:
 	$(info [+] Create the finalised Snowflake IAM role, used to allow comms between AWS and Snowflake)
+	@[ "${AWS_PROFILE}" ] || ( echo "\nError: AWS_PROFILE variable is not set\n"; exit 1 )
 	#1) assign vars to the snowsql query op
 	$(eval SNOWFLAKE_IAM_USER_ARN=$(shell python3 py/parse_snowflake_op.py get_snowflake_iam_user_arn ${SNOWFLAKE_ACCOUNT_NAME}))
 	$(eval SNOWFLAKE_EXT_ID=$(shell python3 py/parse_snowflake_op.py get_ext_id ${SNOWFLAKE_ACCOUNT_NAME}))
@@ -84,6 +88,7 @@ create_snowflake_iam_role:
 
 del_cfn_stacks:
 	$(info [+] Quickly delete cfn templates)
+	@[ "${AWS_PROFILE}" ] || ( echo "\nError: AWS_PROFILE variable is not set\n"; exit 1 )
 	rm -r op/stg/snowflake-query-op/
 	@aws cloudformation delete-stack --stack-name ${PROGRAM}-iam-role-snowflake-access --profile ${AWS_PROFILE}
 	@aws cloudformation delete-stack --stack-name ${PROGRAM}-iam-role-tmp-snowflake-access --profile ${AWS_PROFILE}
