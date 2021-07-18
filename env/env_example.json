@@ -1,0 +1,20 @@
+{
+    "Parameters": {
+        "Program": "DFP",
+        "Environment": "NP",
+        "AWSParameters": {
+            "AwsProfile": "my_example_aws_profile",
+            "AwsAccountId": 123456789012
+        },
+        "SnowflakeParameters": {
+            "SnowflakeAccountName": "EG_SF_ACC_NAME",
+            "SnowflakeNamedConn": "my_example_sf_profile",
+            "SnowflakeDBAUser": "JBloggs",
+            "SnowflakeIAMRoleName": "${PROGRAM_LOWER}-snowflake-access-role",
+            "SnowflakeVPCID": "vpc-123f12e1"
+        },
+        "AdditionalParameters": {
+            "S3BucketEg": "example-s3-bucket-name"
+        }
+    }
+}
