@@ -11,7 +11,6 @@ Automation script to orchestrate of the steps required establish communication b
     * Prerequisites
 3. How-to run
     * Input parameters
-4. Additional info - overview of execution steps
 
 ---
 
