@@ -1,4 +1,4 @@
-default: get_snowflake_vpcid update_s3_bucket_policies create_tmp_snowflake_iam_role create_sf_storage_int_obj create_snowflake_iam_role
+all: get_snowflake_vpcid update_s3_bucket_policies create_tmp_snowflake_iam_role create_sf_storage_int_obj create_snowflake_iam_role
 
 # fetch inputs from config (json) file
 CONFIG_FILE=env/env_example.json
